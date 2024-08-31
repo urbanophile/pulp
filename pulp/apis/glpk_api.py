@@ -72,7 +72,7 @@ class GLPK_CMD(LpSolver_CMD):
     def actualSolve(self, lp):
         """Solve a well formulated lp problem"""
         if not self.executable(self.path):
-            raise PulpSolverError("PuLP: cannot execute " + self.path)
+            raise PulpSolverError("PuLP: cannot execute " + self.path + ". Is GLPK installed?")
         tmpLp, tmpSol = self.create_tmp_files(lp.name, "lp", "sol")
         lp.writeLP(tmpLp, writeSOS=0)
         proc = ["glpsol", "--cpxlp", tmpLp, "-o", tmpSol]
