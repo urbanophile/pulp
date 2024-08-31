@@ -1,5 +1,5 @@
-Elastic Constraints
-^^^^^^^^^^^^^^^^^^^
+How to use Elastic Constraints
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. currentmodule:: pulp
 
 A constraint :math:`C(x) = c` (equality may be replaced by :math:`\le`

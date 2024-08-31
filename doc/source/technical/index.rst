@@ -1,5 +1,5 @@
 
-PuLP Internal Documentation
+PuLP API Reference
 =================================
 
 

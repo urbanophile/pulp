@@ -1,5 +1,5 @@
-How to import and export models in PuLP
-==========================================
+How to import and export models
+=================================
 
 Exporting a model can be useful when the building time takes too long or when the model needs to be passed to another computer to solve. Or any other reason.
 PuLP offers two ways to export a model: to an mps file or to a dictionary /json file. Each offers advantages over the other.

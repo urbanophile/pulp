@@ -1,17 +1,14 @@
-Basic Python Coding
-===================
+Basic Python for PuLP
+======================
 
-In this course you will learn basic programming in Python, but there is also 
-excellent Python Language reference material available on the internet freely. 
-You can download the book `Dive Into Python <http://www.diveintopython.org/>`_ 
-or there are a host of `Beginners Guides <http://wiki.python.org/moin/BeginnersGuide>`_
-to Python on the Python Website. Follow the links to either:
 
-+ `BeginnersGuide/NonProgrammers <http://wiki.python.org/moin/BeginnersGuide/NonProgrammers>`_ 
-+ `BeginnersGuide/Programmers <http://wiki.python.org/moin/BeginnersGuide/Programmers>`_
- 
-depending on your level of current programming knowledge. The code sections 
-below assume a knowledge of fundamental programming principles and mainly 
+This section gives basic overview of the Python programming you need to use PuLP. There are many
+excellent Python Language references available on the internet freely. 
++ You can download the book `Dive Into Python <http://www.diveintopython.org/>`_
++ the `Python Beginners Guides <http://wiki.python.org/moin/BeginnersGuide>`_ on the Python Website. 
+
+
+The code sections below assume a knowledge of fundamental programming principles and mainly 
 focus on Syntax specific to programming in Python.
 
 Note: >>> represents a Python command line prompt.

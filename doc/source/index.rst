@@ -6,7 +6,9 @@
 Optimization with PuLP
 ----------------------
 
-You can begin learning Python and using PuLP
+PuLP is an (MI)LP modeler written in Python. PuLP provides a simple and transparent way to create and solve linear and mixed-integer programming problems in Python. PuLP can generate MPS or LP files and call solvers such as GLPK_, COIN-OR CLP/`CBC`_, CPLEX_, GUROBI_, MOSEK_, XPRESS_, CHOCO_, MIPCL_, HiGHS_, SCIP_/FSCIP_.
+
+You can begin learning Python and PuLP
 by looking at the content below. We recommend that you read The Optimisation Process,
 Optimisation Concepts, and the Introduction to Python
 before beginning the case-studies. For instructions for the installation of PuLP
@@ -21,12 +23,13 @@ relevant information you will need.
 .. toctree::
    :maxdepth: 2
 
-   main/index
-   CaseStudies/index
+   installing_pulp
+   getting_started/index
+   examples/index
    guides/index
-   develop/index
-   technical/index
+   api_reference/index
    plugins/index
+   contribute
    
 Authors
 =======

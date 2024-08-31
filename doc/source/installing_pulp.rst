@@ -1,6 +1,6 @@
 .. _installation:
 
-Installing PuLP at Home
+Installing PuLP
 =======================
 
 PuLP is a free open source software written in Python. It is used to describe 
