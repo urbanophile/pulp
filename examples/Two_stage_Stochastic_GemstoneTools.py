@@ -1,8 +1,10 @@
 r"""
+Title: Gemstone Optimization problem
+
 Author: Louis Luangkesorn <lugerpitt@gmail.com> 2019
 https://github.com/lluang
 
-Title: Gemstone Optimization problem
+This is a production planning problem using two stages and 4 scenarios. 
 
 Problem taken from Data, Models, and Decisions by Bertsimas and Freund, 4th Edition
 DMD 7.2
