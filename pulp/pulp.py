@@ -26,22 +26,24 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 """
-PuLP is an LP modeler written in python. PuLP can generate MPS or LP files
-and call GLPK[1], COIN CLP/CBC[2], CPLEX[3], GUROBI[4] and MOSEK[5] to solve linear
-problems.
+PuLP is an linear and mixed integer programming modeler written in Python.
+
+With PuLP, it is simple to create MILP optimisation problems and solve them with the latest open-source (or proprietary) solvers.  PuLP can generate MPS or LP files and call solvers such as GLPK_, COIN-OR CLP/`CBC`_, CPLEX_, GUROBI_, MOSEK_, XPRESS_, CHOCO_, MIPCL_, HiGHS_, SCIP_/FSCIP_.
+
+PuLP can generate MPS or LP files and call GLPK[1], COIN CLP/CBC[2], CPLEX[3],
+GUROBI[4] and MOSEK[5] to solve linear problems.
 
 See the examples directory for examples.
 
 The examples require at least a solver in your PATH or a shared library file.
 
-Documentation is found on https://www.coin-or.org/PuLP/.
-A comprehensive wiki can be found at https://www.coin-or.org/PuLP/
+The documentation for PuLP can be `found here <https://coin-or.github.io/pulp/>`_.
 
 Use LpVariable() to create new variables. To create a variable 0 <= x <= 3
 >>> x = LpVariable("x", 0, 3)
 
-To create a variable 0 <= y <= 1
->>> y = LpVariable("y", 0, 1)
+To create a discrete, binary variable y:
+>>> y = LpVariable("y", cat="Binary")
 
 Use LpProblem() to create new problems. Create "myProblem"
 >>> prob = LpProblem("myProblem", const.LpMinimize)
@@ -84,12 +86,21 @@ Exported Functions:
 Comments, bug reports, patches and suggestions are welcome.
 https://github.com/coin-or/pulp
 
-References:
-[1] http://www.gnu.org/software/glpk/glpk.html
-[2] http://www.coin-or.org/
-[3] http://www.cplex.com/
-[4] http://www.gurobi.com/
-[5] http://www.mosek.com/
+References
+----------
+
+.. _GLPK: http://www.gnu.org/software/glpk/glpk.html
+.. _CBC: https://github.com/coin-or/Cbc
+.. _CPLEX: http://www.cplex.com/
+.. _GUROBI: http://www.gurobi.com/
+.. _MOSEK: https://www.mosek.com/
+.. _XPRESS: https://www.fico.com/es/products/fico-xpress-solver
+.. _CHOCO: https://choco-solver.org/
+.. _MIPCL: http://mipcl-cpp.appspot.com/
+.. _SCIP: https://www.scipopt.org/
+.. _HiGHS: https://highs.dev
+.. _FSCIP: https://ug.zib.de
+
 """
 
 from collections import Counter
@@ -149,6 +160,7 @@ class LpElement:
     trans = maketrans(illegal_chars, "________")
 
     def setName(self, name):
+        """Give a name to element, illegal characters will be replaced."""
         if name:
             if self.expression.match(name):
                 warnings.warn(
@@ -237,16 +249,16 @@ class LpElement:
 
 class LpVariable(LpElement):
     """
-    This class models an LP Variable with the specified associated parameters
+    Define a real or integer variable with a name, bounds, category, and expression.
 
     :param name: The name of the variable used in the output .lp file
     :param lowBound: The lower bound on this variable's range.
         Default is negative infinity
     :param upBound: The upper bound on this variable's range.
         Default is positive infinity
-    :param cat: The category this variable is in, Integer, Binary or
-        Continuous(default)
-    :param e: Used for column based modelling: relates to the variable's
+    :param cat: The category of this variable: Integer, Binary or
+        Continuous (default)
+    :param e: An expression, used for column based modelling. Relates to the variable's
         existence in the objective function and constraints
     """
 
@@ -270,9 +282,9 @@ class LpVariable(LpElement):
 
     def toDict(self):
         """
-        Exports a variable into a dictionary with its relevant information
+        Export a variable to a dictionary with keys for its' parameters and values.
 
-        :return: a dictionary with the variable information
+        :return: a dictionary containing all the variable information
         :rtype: dict
         """
         return dict(
@@ -289,7 +301,7 @@ class LpVariable(LpElement):
     @classmethod
     def fromDict(cls, dj=None, varValue=None, **kwargs):
         """
-        Initializes a variable object from information that comes from a dictionary (kwargs)
+        Initialize a variable from a dictionary (requires at least name)
 
         :param dj: shadow price of the variable
         :param float varValue: the value to set the variable
@@ -316,8 +328,11 @@ class LpVariable(LpElement):
         lowBound=None,
         upBound=None,
         cat=const.LpContinuous,
-        indexStart=[],
+        indexStart=None,
     ):
+        if indexStart is None:
+            indexStart = []
+
         if not isinstance(indices, tuple):
             indices = (indices,)
         if "%" not in name:
@@ -349,7 +364,7 @@ class LpVariable(LpElement):
         indexStart=[],
     ):
         """
-        This function creates a dictionary of :py:class:`LpVariable` with the specified associated parameters.
+        Create a dictionary of :py:class:`LpVariable` with a given name, indices, bounds and cat.
 
         :param name: The prefix to the name of each LP variable created
         :param indices: A list of strings of the keys to the dictionary of LP
@@ -421,32 +436,37 @@ class LpVariable(LpElement):
         return d
 
     def getLb(self):
+        """Return the lower bound of the variable"""
         return self.lowBound
 
     def getUb(self):
+        """Return the upper bound of the variable."""
         return self.upBound
 
     def bounds(self, low, up):
+        """Update the upper and lower bounds of the variable"""
         self.lowBound = low
         self.upBound = up
         self.modified = True
 
     def positive(self):
+        """Make the variable positive"""
         self.bounds(0, None)
 
     def value(self):
+        """Returnsthe variable value"""
         return self.varValue
 
     def round(self, epsInt=1e-5, eps=1e-7):
         if self.varValue is not None:
             if (
-                self.upBound != None
+                self.upBound is not None
                 and self.varValue > self.upBound
                 and self.varValue <= self.upBound + eps
             ):
                 self.varValue = self.upBound
             elif (
-                self.lowBound != None
+                self.lowBound is not None
                 and self.varValue < self.lowBound
                 and self.varValue >= self.lowBound - eps
             ):
@@ -460,7 +480,7 @@ class LpVariable(LpElement):
     def roundedValue(self, eps=1e-5):
         if (
             self.cat == const.LpInteger
-            and self.varValue != None
+            and self.varValue is not None
             and abs(self.varValue - round(self.varValue)) <= eps
         ):
             return round(self.varValue)
@@ -468,10 +488,10 @@ class LpVariable(LpElement):
             return self.varValue
 
     def valueOrDefault(self):
-        if self.varValue != None:
+        if self.varValue is not None:
             return self.varValue
-        elif self.lowBound != None:
-            if self.upBound != None:
+        elif self.lowBound is not None:
+            if self.upBound is not None:
                 if 0 >= self.lowBound and 0 <= self.upBound:
                     return 0
                 else:
@@ -484,7 +504,7 @@ class LpVariable(LpElement):
                     return 0
                 else:
                     return self.lowBound
-        elif self.upBound != None:
+        elif self.upBound is not None:
             if 0 <= self.upBound:
                 return 0
             else:
@@ -493,6 +513,14 @@ class LpVariable(LpElement):
             return 0
 
     def valid(self, eps):
+        """
+        Check if variable's value satisfies respects the properties of its' category.
+
+        - Dummy variable should be None
+        - All other variables should have a value within eps of their bounds.
+        - Integer/Binary variables should be within eps of the nearest integer.
+        """
+
         if self.name == "__dummy" and self.varValue is None:
             return True
         if self.varValue is None:
@@ -509,11 +537,12 @@ class LpVariable(LpElement):
         return True
 
     def infeasibilityGap(self, mip=1):
-        if self.varValue == None:
+        """Calculate the distance by which the variable exceeds its' bound."""
+        if self.varValue is None:
             raise ValueError("variable value is None")
-        if self.upBound != None and self.varValue > self.upBound:
+        if self.upBound is not None and self.varValue > self.upBound:
             return self.varValue - self.upBound
-        if self.lowBound != None and self.varValue < self.lowBound:
+        if self.lowBound is not None and self.varValue < self.lowBound:
             return self.varValue - self.lowBound
         if (
             mip
@@ -524,18 +553,23 @@ class LpVariable(LpElement):
         return 0
 
     def isBinary(self):
+        """Check if variable is integer with bounds between 0 and 1."""
         return self.cat == const.LpInteger and self.lowBound == 0 and self.upBound == 1
 
     def isInteger(self):
+        """Check if variable category is integer."""
         return self.cat == const.LpInteger
 
     def isFree(self):
+        """Check if variable has both no upper and no lower bounds."""
         return self.lowBound is None and self.upBound is None
 
     def isConstant(self):
+        """Check if variable has equal upper and lower bounds"""
         return self.lowBound is not None and self.upBound == self.lowBound
 
     def isPositive(self):
+        """Check if variable has non-negative bounds"""
         return self.lowBound == 0 and self.upBound is None
 
     def asCplexLpVariable(self):
@@ -543,7 +577,7 @@ class LpVariable(LpElement):
             return self.name + " free"
         if self.isConstant():
             return self.name + f" = {self.lowBound:.12g}"
-        if self.lowBound == None:
+        if self.lowBound is None:
             s = "-inf <= "
         # Note: XPRESS and CPLEX do not interpret integer variables without
         # explicit bounds
@@ -574,7 +608,7 @@ class LpVariable(LpElement):
         return bool(self.roundedValue())
 
     def addVariableToConstraints(self, e):
-        """adds a variable to the constraints indicated by
+        """Add a variable to  constraints given in an expression e. indicated by
         the LpConstraintVars in e
         """
         for constraint, coeff in e.items():
@@ -582,7 +616,8 @@ class LpVariable(LpElement):
 
     def setInitialValue(self, val, check=True):
         """
-        sets the initial value of the variable to `val`
+        Give a starting value of `val` to the variable
+
         May be used for warmStart a solver, if supported by the solver
 
         :param float val: value to set to variable
@@ -611,7 +646,8 @@ class LpVariable(LpElement):
 
     def fixValue(self):
         """
-        changes lower bound and upper bound to the initial value if exists.
+        Change lower bound and upper bound to the initial value if exists
+
         :return: None
         """
         val = self.varValue
@@ -620,6 +656,7 @@ class LpVariable(LpElement):
 
     def isFixed(self):
         """
+        Check if variable is constant.
 
         :return: True if upBound and lowBound are the same
         :rtype: bool
@@ -627,6 +664,8 @@ class LpVariable(LpElement):
         return self.isConstant()
 
     def unfixValue(self):
+        """Change variable bounds back to original bounds."""
+
         self.bounds(self._lowbound_original, self._upbound_original)
 
 
@@ -766,9 +805,7 @@ class LpAffineExpression(_DICT_TYPE):
         return s
 
     def sorted_keys(self):
-        """
-        returns the list of keys sorted by name
-        """
+        """Return the list of keys sorted by name"""
         result = [(v.name, v) for v in self.keys()]
         result.sort()
         result = [v for _, v in result]
@@ -1156,7 +1193,7 @@ class LpConstraint(LpAffineExpression):
 
     def makeElasticSubProblem(self, *args, **kwargs):
         """
-        Builds an elastic subproblem by adding variables to a hard constraint
+        Create an elastic subproblem by adding variables to a hard constraint
 
         uses FixedElasticSubProblem
         """
@@ -1164,7 +1201,7 @@ class LpConstraint(LpAffineExpression):
 
     def toDict(self):
         """
-        exports constraint information into a dictionary
+        Exports constraint information into a dictionary
 
         :return: dictionary with all the constraint information
         """
@@ -1280,7 +1317,7 @@ class LpConstraintVar(LpElement):
 
 
 class LpProblem:
-    """An LP Problem"""
+    """A container class for a linear, integer or mixed problem."""
 
     def __init__(self, name="NoName", sense=const.LpMinimize):
         """
@@ -1702,7 +1739,7 @@ class LpProblem:
 
     def coefficients(self, translation=None):
         coefs = []
-        if translation == None:
+        if translation is None:
             for c in self.constraints:
                 cst = self.constraints[c]
                 coefs.extend([(v.name, c, cst[v]) for v in cst])
@@ -1758,7 +1795,7 @@ class LpProblem:
         """
         Checks if there are at least two variables with the same name
         :return: 1
-        :raises `const.PulpError`: if there ar duplicates
+        :raises `const.PulpError`: if there is duplicates
         """
         name_counter = Counter(variable.name for variable in self.variables())
         repeated_names = {
@@ -1839,7 +1876,7 @@ class LpProblem:
     def restoreObjective(self, wasNone, dummyVar):
         if wasNone:
             self.objective = None
-        elif not dummyVar is None:
+        elif dummyVar is not None:
             self.objective -= dummyVar
 
     def solve(self, solver=None, **kwargs):
@@ -1928,7 +1965,7 @@ class LpProblem:
 
     def resolve(self, solver=None, **kwargs):
         """
-        resolves an Problem using the same solver as previously
+        Solves a Problem using the same solver used previously.
         """
         if not (solver):
             solver = self.solver
@@ -2034,9 +2071,7 @@ class FixedElasticSubProblem(LpProblem):
             self.objective = penalty * self.upVar - penalty * self.lowVar
 
     def _findValue(self, attrib):
-        """
-        safe way to get the value of a variable that may not exist
-        """
+        """Safe way to get a variable value (returns 0.0 if it does not exist)"""
         var = getattr(self, attrib, 0)
         if var:
             if value(var) is not None:
@@ -2080,24 +2115,19 @@ class FixedElasticSubProblem(LpProblem):
         return self.constraint.value() - self.constant - upVar - lowVar - freeVar
 
     def deElasticize(self):
-        """de-elasticize constraint"""
+        """De-elasticize constraint by setting upper and lower bounds to 0"""
         self.upVar.upBound = 0
         self.lowVar.lowBound = 0
 
     def reElasticize(self):
-        """
-        Make the Subproblem elastic again after deElasticize
-        """
+        """Make the subproblem elastic again after deElasticize"""
         self.upVar.lowBound = 0
         self.upVar.upBound = None
         self.lowVar.upBound = 0
         self.lowVar.lowBound = None
 
     def alterName(self, name):
-        """
-        Alters the name of anonymous parts of the problem
-
-        """
+        """Alter the name of anonymous parts of the problem"""
         self.name = f"{name}_elastic_SubProblem"
         if hasattr(self, "freeVar"):
             self.freeVar.name = self.name + "_free_bound"
@@ -2109,7 +2139,9 @@ class FixedElasticSubProblem(LpProblem):
 
 class FractionElasticSubProblem(FixedElasticSubProblem):
     """
-    Contains the subproblem generated by converting a Fraction constraint
+    Subproblem container for converting a Fraction constraint into an elastic constraint
+
+    For example: 
     numerator/(numerator+complement) = b
     into an elastic constraint
 
@@ -2209,9 +2241,7 @@ class FractionElasticSubProblem(FixedElasticSubProblem):
                 raise ZeroDivisionError
 
     def isViolated(self):
-        """
-        returns true if the penalty variables are non-zero
-        """
+        """Return true if the penalty variables are non-zero"""
         if abs(value(self.denominator)) >= const.EPS:
             if self.lowTarget is not None:
                 if self.lowTarget > self.findLHSValue():
