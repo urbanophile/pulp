@@ -7,7 +7,16 @@ Authors: Antony Phillips,  Dr Stuart Mitchell  2008
 from typing import Dict, List, Optional, Tuple, Union
 
 # Import PuLP modeler functions
-from pulp import *
+from pulp import (
+    LpProblem,
+    LpMinimize,
+    LpVariable,
+    LpContinuous,
+    LpInteger,
+    lpSum,
+    value,
+)
+from pulp.utilities import splitDict
 
 
 class Pattern:
@@ -112,9 +121,11 @@ def subSolve(
     trim = LpVariable("Trim", 0, None, LpInteger)
 
     # The objective function is entered: the reduced cost of a new pattern
-    prob += (Pattern.cost - Pattern.trimValue * trim) - lpSum(
-        [_vars[i] * duals[i] for i in Pattern.lenOpts]
-    ), "Objective"
+    prob += (
+        (Pattern.cost - Pattern.trimValue * trim)
+        - lpSum([_vars[i] * duals[i] for i in Pattern.lenOpts]),
+        "Objective",
+    )
 
     # The conservation of length constraint is entered
     prob += (

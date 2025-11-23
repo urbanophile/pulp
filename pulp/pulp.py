@@ -153,7 +153,15 @@ import re
 
 
 class LpElement:
-    """Base class for LpVariable and LpConstraintVar"""
+    """Base class for LpVariable and LpConstraintVar.
+
+    Provides common methods for PuLP's variable types and rarely used directly. Implements name handling, operator overloading for mathematical expressions, and special methods for the collection interface.
+
+    See Also
+    --------
+    LpVariable : Create decision variables
+    LpConstraintVar : Create column constraints (advanced)
+    """
 
     # To remove illegal characters from the names
     illegal_chars = "-+[] ->/"
@@ -178,6 +186,8 @@ class LpElement:
     name = property(fget=getName, fset=setName)
 
     def __init__(self, name):
+        """Create a PuLP element with a sanitised, human-readable, non-unique name"""
+
         self.name = name
         # self.hash MUST be different for each variable
         # else dict() will call the comparison operators that are overloaded
@@ -730,7 +740,7 @@ class LpAffineExpression(dict):
 
     Examples:
 
-       >>> f=LpAffineExpression(LpElement('x'))
+       >>> f = LpAffineExpression(LpElement('x'))
        >>> f
        1*x + 0
        >>> x_name = ['x_0', 'x_1', 'x_2']
@@ -941,7 +951,8 @@ class LpAffineExpression(dict):
         return result
 
     def addInPlace(self, other, sign: Literal[+1, -1] = 1):
-        """
+        """Modify this expression by adding or subtracting another expression, variable, or constant.
+
         :param int sign: the sign of the operation to do other.
             if we add other => 1
             if we subtract other => -1
@@ -1108,7 +1119,7 @@ class LpAffineExpression(dict):
 
 
 class LpConstraint:
-    """An LP constraint"""
+    """Represents a linear inequality or equality constraint"""
 
     constant: float
     expr: LpAffineExpression
@@ -1289,6 +1300,11 @@ class LpConstraint:
             raise TypeError(f"Cannot divide LpConstraint by {type(other)}")
 
     def valid(self, eps: float = 0) -> bool:
+        """Check if this constraint is satisfied given current variable values.
+
+        :eps : float, default 0
+        Numerical tolerance for constraint satisfaction
+        """
         val = self.value()
         if val is None:
             return False
@@ -1301,7 +1317,9 @@ class LpConstraint:
         """
         Builds an elastic subproblem by adding variables to a hard constraint
 
-        uses FixedElasticSubProblem
+        See Also
+        --------
+        FixedElasticSubProblem :
         """
         return FixedElasticSubProblem(self, *args, **kwargs)
 
@@ -1467,18 +1485,54 @@ class LpFractionConstraint(LpConstraint):
 
 
 class LpConstraintVar(LpElement):
-    """A Constraint that can be treated as a variable when constructing
-    a LpProblem by columns
+    """A constraint which can have variables added during solving.
+
+    Used for constructing a problem by columns first. Especially for implementing a column generation algorithm where variables are added dynamically during solving. The problem is built by specifying what constraints each variable participates in, rather than building constraints from variables. This is the reverse of the typical row-wise approach.
+
+    Examples:
+
+        >>> prob = LpProblem("Production", LpMinimize)
+        >>>
+        >>> # Objective and constraints defined before variables!
+        >>> cost = LpConstraintVar("TotalCost")
+        >>> labor = LpConstraintVar("LabourHours", const.LpConstraintLE, 40)
+        >>> metal = LpConstraintVar("MetalKg", const.LpConstraintLE, 100)
+        >>> demand = LpConstraintVar("MinDemand", const.LpConstraintGE, 20)
+        >>>
+        >>> prob.setObjective(cost)
+        >>> prob += labour
+        >>> prob += metal
+        >>> prob += demand
+        >>>
+        >>> add variables by specifying their coefficients in each constraint
+        >>> x = LpVariable("ProductA", 0, None, const.LpContinuous,
+        ...                10*cost + 2*labour + 3*metal +1*demand)
+        >>> y = LpVariable("ProductB", 0, None, const.LpContinuous,
+        ...                15*cost + 3*labour + 2*metal + 1*demand)
+        >>> prob.solve(PULP_CBC_CMD(msg=0))
+
+    See Also
+    --------
+    LpVariable : Standard variable creation (row-wise modelling)
+    LpConstraint : Standard constraint creation
+    LpProblem.setObjective : Set the objective in column-wise modelling
     """
 
     def __init__(self, name=None, sense=None, rhs=None, e=None):
+        """Create a constraint variable for column-wise modelling.
+
+        :param name: Name of the constraint
+        :param sense: one of the LpConstraintLE, LpConstraintGE or LpConstraintEQ
+        :param rhs: Right-hand side value of the constraint
+        :param e: an LpAffineExpression for  modelling
+        """
         LpElement.__init__(self, name)
         self.constraint = LpConstraint(name=self.name, sense=sense, rhs=rhs, e=e)
 
     def addVariable(self, var, coeff):
-        """
-        Adds a variable to the constraint with the
-        activity coeff
+        """Adds a new variable to the constraint with given coefficient.
+
+        Allows for incremental construction of the column.
         """
         self.constraint.expr.addterm(var, coeff)
 
@@ -1487,7 +1541,7 @@ class LpConstraintVar(LpElement):
 
 
 class LpProblem:
-    """An LP Problem"""
+    """A linear or mixed-integer programming problem formulation."""
 
     def __init__(self, name="NoName", sense=const.LpMinimize):
         """
@@ -1560,7 +1614,7 @@ class LpProblem:
             self._variable_ids[v.hash] = v
 
     def copy(self):
-        """Make a copy of self. Expressions are copied by reference"""
+        """Returns a shallow copy of self. Expressions are copied by reference"""
         lpcopy = LpProblem(name=self.name, sense=self.sense)
         lpcopy.objective = self.objective
         lpcopy.constraints = self.constraints.copy()
@@ -1569,7 +1623,7 @@ class LpProblem:
         return lpcopy
 
     def deepcopy(self):
-        """Make a copy of self. Expressions are copied by value"""
+        """Returns a deep copy of self. Expressions are copied by value"""
         lpcopy = LpProblem(name=self.name, sense=self.sense)
         if self.objective is not None:
             lpcopy.objective = self.objective.copy()
@@ -1725,6 +1779,7 @@ class LpProblem:
         return constraintsNames, variablesNames, "OBJ"
 
     def isMIP(self):
+        """Returns true if any variables are integers"""
         for v in self.variables():
             if v.cat == const.LpInteger:
                 return 1
@@ -1732,10 +1787,10 @@ class LpProblem:
 
     def roundSolution(self, epsInt=1e-5, eps=1e-7):
         """
-        Rounds the lp variables
+        Rounds the solution variable values
 
-        Inputs:
-            - none
+        :param epsInt: =1e-5,
+        :param eps: =1e-7
 
         Side Effects:
             - The lp variables are rounded
@@ -1783,9 +1838,9 @@ class LpProblem:
 
     def addVariables(self, variables: Iterable[LpVariable]):
         """
-        Adds variables to the problem before a constraint is added
+        Adds an iterable collection of variables to the problem before a constraint is added
 
-        :param variables: the variables to be added
+        :param variables: an collection variables to be added
         """
         for v in variables:
             self.addVariable(v)
@@ -1844,7 +1899,7 @@ class LpProblem:
 
     def setObjective(self, obj):
         """
-        Sets the input variable as the objective function. Used in Columnwise Modelling
+        Sets the input variable as the objective function. Used in column-wise modelling
 
         :param obj: the objective function of type :class:`LpConstraintVar`
 

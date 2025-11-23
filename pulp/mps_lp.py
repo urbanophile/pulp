@@ -303,6 +303,59 @@ def writeMPS(
     mip: bool = True,
     with_objsense: bool = False,
 ):
+    """
+    Write an LP problem to an MPS (Mathematical Programming System) format file.
+
+    MPS is a standard file format for representing linear and mixed-integer programming
+    problems. This function exports the problem structure including objective, constraints,
+    variable bounds, integer restrictions, and special ordered sets (SOS).
+
+    :param lp: The LP problem to write
+    :type lp: LpProblem
+    :param filename: Path to the output MPS file
+    :type filename: str
+    :param mpsSense: Optimization direction for MPS file. 0 uses the problem's sense,
+        1 for minimize, -1 for maximize
+    :type mpsSense: int
+    :param rename: If True, use normalized names (MODEL for problem, C0000001 for constraints,
+        X0000001 for variables) instead of original names. Useful for solvers with
+        strict naming requirements
+    :type rename: bool
+    :param mip: If True, include integer variable declarations; if False, treat all
+        variables as continuous
+    :type mip: bool
+    :param with_objsense: If True, write OBJSENSE section (newer MPS format);
+        if False, write sense as a comment (compatible with older solvers)
+    :type with_objsense: bool
+    :return: If rename=False, returns list of variables in writing order.
+        If rename=True, returns tuple of (variables, variable_names_dict,
+        constraint_names_dict, objective_name)
+    :rtype: list or tuple
+
+    MPS File Structure:
+        - NAME: Problem name
+        - ROWS: Constraint definitions and objective
+        - COLUMNS: Variable coefficients in objective and constraints
+        - RHS: Right-hand side values for constraints
+        - BOUNDS: Variable bounds (lower/upper limits)
+        - SOS: Special Ordered Sets (SOS1 and SOS2 constraints)
+        - ENDATA: End marker
+
+    Example:
+        >>> from pulp import LpProblem, LpVariable, LpMinimize
+        >>> prob = LpProblem("example", LpMinimize)
+        >>> x = LpVariable("x", 0, 10)
+        >>> prob += x
+        >>> prob += x >= 5
+        >>> writeMPS(prob, "problem.mps")
+
+    Notes:
+        - SOS constraints (prob.sos1, prob.sos2) are automatically included
+        - The function temporarily modifies the objective if mpsSense differs from
+          the problem's sense, then restores it
+        - For compatibility with strict solvers, use rename=True to avoid special
+          characters in names
+    """
     wasNone, dummyVar = lp.fixObjective()
     if mpsSense == 0:
         mpsSense = lp.sense
@@ -360,6 +413,19 @@ def writeMPS(
     for v in vs:
         bound_lines.extend(writeMPSBoundLines(varNames[v.name], v, mip))
 
+    # SOS constraints
+    sos_lines: list[str] = []
+    if lp.sos1:
+        for sos_name, sos_set in lp.sos1.items():
+            sos_lines.append(f" S1 {sos_name}\n")
+            for v, weight in sos_set.items():
+                sos_lines.append(f"    {varNames[v.name]}  {weight:.12g}\n")
+    if lp.sos2:
+        for sos_name, sos_set in lp.sos2.items():
+            sos_lines.append(f" S2 {sos_name}\n")
+            for v, weight in sos_set.items():
+                sos_lines.append(f"    {varNames[v.name]}  {weight:.12g}\n")
+
     with open(filename, "w") as f:
         if with_objsense:
             f.write("OBJSENSE\n")
@@ -376,6 +442,9 @@ def writeMPS(
         f.write("".join(rhs_lines))
         f.write("BOUNDS\n")
         f.write("".join(bound_lines))
+        if sos_lines:
+            f.write("SOS\n")
+            f.write("".join(sos_lines))
         f.write("ENDATA\n")
     lp.restoreObjective(wasNone, dummyVar)
     # returns the variables, in writing order

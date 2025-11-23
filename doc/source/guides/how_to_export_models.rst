@@ -1,26 +1,41 @@
-How to import and export models in PuLP
+How to save and load models in PuLP
 ==========================================
 
-Exporting a model can be useful when the building time takes too long or when the model needs to be passed to another computer to solve. Or any other reason.
-PuLP offers two ways to export a model: to an mps file or to a dictionary /json file. Each offers advantages over the other.
+Saving a model can be useful when the building time takes too long, when the model needs to be passed to another computer to solve, or a problem needs to be shared.
+PuLP offers three ways to export a model: to an MPS file, a JSON file, or an LP file. Each offers advantages over the other.
 
-**The mps format** is an industry standard. But it is not very flexible so some information cannot be stored. It stores only variables and constraints. It does not store the values of variables.
+1. **MPS format** is an industry standard. But it is not very flexible so some information cannot be stored. It stores only variables and constraints. It does not store the values of variables. resource: https://lpsolve.sourceforge.net/5.5/mps-format.htm https://en.wikipedia.org/wiki/MPS_(format)
 
-**The dictionary/ json format** is made to fit how pulp stores the information and so it does not lose information: this format file saves enough data to be able to restore a complete pulp model on reading it.
+2. **JSON format** is made to fit how pulp stores the information and so it does not lose information: this format file saves enough data to be able to restore a complete pulp model on reading it.
 
-The interface to import and export for both formats is similar as can be seen in the Example 1 below.
+3. **LP format** is a human-readable text format that represents the linear programming model. It is not possible to load LP files back into PuLP models.
+
+The interface to import and export for all three formats is similar as can be seen in the Examples 1, 2 and 3 below.
+
+PuLP does not support saving and loading models in other formats such as `XMIP` or `NL https://web.archive.org/web/20161228202832/https://cfwebprod.sandia.gov/cfdocs/CompResearch/docs/nlwrite20051130.pdf`.
 
 Considerations
 ------------------
 
 The following considerations need to be taken into account:
 
+======  ======== ========  ================= =================== ======================
+Format  Can Read Can Write  Stores Solution  human-readable      Stores Ints and Bools 
+======  ======== ========  ================= =================== ======================
+MPS     Yes      Yes        No               No                  No
+LP      No       Yes        No               Yes                 No
+JSON    Yes      Yes        Yes              Yes                 Yes
+======  ======== ========  ================= =================== ======================
+
+
+Further more:
+
 #. Variable names need to be unique. PuLP permits having variable names because it uses an internal code for each one. But we do not export that code. So we identify variables by their name only.
 #. Variables are not exported in a grouped way. This means that if you have several `dictionaries of many variables each` you will end up with a very long list of variables. This can be seen in the Example 2.
-#. Output information is also written to the json format. This means that the status, solution status, the values of variables and shadow prices / reduced costs are exported too. This means that it is possible to export a model that has been solved and then read it again only to see the values of the variables.
-#. For json, we use the base `json` package. But if `ujson` is available, we use that so the import / export can be really fast.
+#. Output information is also written to the JSON format. This means that the status, solution status, the values of variables and shadow prices / reduced costs are exported too. This means that it is possible to export a model that has been solved and then read it again only to see the values of the variables.
+#. For JSON, we use the base `json` package. But if `ujson` is available, we use that so the import / export can be really fast.
 
-Example 1: json
+Example 1: JSON
 ----------------
 
 A very simple example taken from the internal tests. Imagine the following problem::
@@ -117,7 +132,7 @@ And the result will be available in our *new* variables::
     # 3.0
 
 
-Example 1: mps
+Example 2: MPS
 ----------------
 
 The same model::
@@ -132,7 +147,7 @@ The same model::
     prob += x + z >= 10, "c2"
     prob += -y + z == 7.5, "c3"
 
-We can now export the problem into an mps file::
+We can now export the problem into an MPS file::
 
     prob.writeMPS("test.mps")
 
@@ -156,10 +171,48 @@ We can now import this file::
 
 The resulting tuple is exactly the same format as the previous one.
 
-Example 2: json
+Example 3: LP
+----------------
+
+The same model::
+
+    from pulp import *
+    prob = LpProblem("test_export_dict_MIP", LpMinimize)
+    x = LpVariable("x", 0, 4)
+    y = LpVariable("y", -1, 1)
+    z = LpVariable("z", 0, None, LpInteger)
+    prob += x + 4 * y + 9 * z, "obj"
+    prob += x + y <= 5, "c1"
+    prob += x + z >= 10, "c2"
+    prob += -y + z == 7.5, "c3"
+
+We can now export the problem into an LP file::
+
+    prob.writeLP("test.lp")
+
+This generates the following output file `test.lp`::
+
+    \* test_export_dict_MIP *\
+    Minimize
+    obj: x + 4 y + 9 z
+    Subject To
+    c1: x + y <= 5
+    c2: x + z >= 10
+    c3: - y + z = 7.5
+    Bounds
+    x <= 4
+    -1 <= y <= 1
+    0 <= z
+    Generals
+    z
+    End
+
+But we **cannot** read LP files back into PuLP models.
+
+Example 4: JSON
 ------------------
 
-We will use as example the model in :ref:`set-partitioning-problem`::
+Here we explore a more complicated example using the model in :ref:`set-partitioning-problem`::
 
     import pulp
 
@@ -174,11 +227,11 @@ We will use as example the model in :ref:`set-partitioning-problem`::
         """
         return abs(ord(table[0]) - ord(table[-1]))
                     
-    #create list of all possible tables
+    # create list of all possible tables
     possible_tables = [tuple(c) for c in pulp.allcombinations(guests, 
                                             max_table_size)]
 
-    #create a binary variable to state that a table setting is used
+    # create a binary variable to state that a table setting is used
     x = pulp.LpVariable.dicts('table', possible_tables, 
                                 lowBound = 0,
                                 upBound = 1,
@@ -188,11 +241,11 @@ We will use as example the model in :ref:`set-partitioning-problem`::
 
     seating_model += pulp.lpSum([happiness(table) * x[table] for table in possible_tables])
 
-    #specify the maximum number of tables
+    # specify the maximum number of tables
     seating_model += pulp.lpSum([x[table] for table in possible_tables]) <= max_tables, \
                                 "Maximum_number_of_tables"
 
-    #A guest must seated at one and only one table
+    # A guest must seated at one and only one table
     for guest in guests:
         seating_model += pulp.lpSum([x[table] for table in possible_tables
                                     if guest in table]) == 1, "Must_seat_%s"%guest
@@ -201,7 +254,7 @@ We *could* directly solve the model doing::
 
     seating_model.solve()
 
-Instead, we are going to export it to a json file::
+Instead, we are going to export it to a JSON file::
 
     seating_model.to_json("seating_model.json")
 
@@ -227,11 +280,11 @@ And inspect some of the values::
 
 
 Grouping variables
-------------------------------------
+-------------------
 
 As the "Considerations" section mentions, the grouping of variables is not restored automatically. Nevertheless, by using some strict naming convention on variable names and clever parsing, one can reconstruct the original structure of the variables.
 
-Caveats with json and pandas / numpy data types
+Caveats with JSON and pandas / numpy data types
 --------------------------------------------------
 
 The `json` module in python has some issues transforming numpy data types (e.g., `np.integer`). The easier way to solve this problem is to provide a custom encoding class as shown `here <https://stackoverflow.com/a/57915246/6508131>`_::
@@ -251,4 +304,4 @@ The `json` module in python has some issues transforming numpy data types (e.g.,
 
     wedding_model.to_json("seating_model.json", cls=NpEncoder)
 
-Note that this custom encoding class may not work with the `ujson` package. An alternative is to cast all values using `int()` or `float()` before using them in `pulp`.
+Note: this custom encoding class may not work with the `ujson` package. An alternative is to cast all values using `int()` or `float()` before using them in `pulp`.

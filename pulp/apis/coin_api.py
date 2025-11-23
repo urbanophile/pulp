@@ -433,9 +433,9 @@ class PULP_CBC_CMD(COIN_CMD):
 
 
 def COINMP_DLL_load_dll(path: list[str]):
-    """
-    function that loads the DLL useful for debugging installation problems
-    path is a list of paths actually
+    """Despite the name, loads the CBC DLL or SO (e.g. for debugging installations).
+
+    :param path: this is a list of paths actually
     """
     if os.name == "nt":
         lib = ctypes.windll.LoadLibrary(str(path[-1]))  # type: ignore[attr-defined,unused-ignore]
@@ -1000,7 +1000,6 @@ class CYLP(LpSolver):
             return stop_status
 
         def buildSolverModel(self, lp):
-
             my_model = cy.CyClpSimplex()
             tmpMps = f"{lp.name}-pulp.mps"
             lp.writeMPS(tmpMps)

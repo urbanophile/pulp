@@ -5,7 +5,7 @@ Authors: Antony Phillips,  Dr Stuart Mitchell  2008
 """
 
 # Import Column Generation functions
-from .CGcolumnwise import *
+from .CGcolumnwise import createMaster, addPatterns, masterSolve, subSolve
 
 # The Master Problem is created
 prob, obj, constraints = createMaster()
@@ -15,11 +15,13 @@ newPatterns = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
 
 # New patterns will be added until newPatterns is an empty list
 while newPatterns:
-    # The new patterns are added to the problem
+    # New patterns are added to the problem
     addPatterns(obj, constraints, newPatterns)
+
     # The master problem is solved, and the dual variables are returned
     duals = masterSolve(prob)
-    # The sub problem is solved and a new pattern will be returned if there is one
+
+    # The subproblem is solved and a new pattern will be returned if there is one
     # which can reduce the master objective function
     assert isinstance(duals, dict)
     newPatterns = subSolve(duals)

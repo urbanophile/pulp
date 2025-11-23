@@ -5,7 +5,7 @@ Authors: Antony Phillips,  Dr Stuart Mitchell  2008
 """
 
 # Import Column Generation functions
-from .CG import *
+from .CG import Pattern, masterSolve, subSolve
 
 # The roll data is created
 rollData = {  # Length Demand SalePrice
@@ -21,12 +21,12 @@ morePatterns = True
 patternslist = [[4, 0, 0], [0, 2, 0], [0, 0, 2]]
 
 # The starting patterns are instantiated with the Pattern class
-Patterns: List[Pattern] = []
+Patterns: list[Pattern] = []
 for i in patternslist:
     Patterns += [Pattern("P" + str(len(Patterns)), i)]
 
 # This loop will be repeated until morePatterns is set to False
-while morePatterns == True:
+while morePatterns:
     # Solve the problem as a Relaxed LP
     duals = masterSolve(Patterns, rollData)
     assert isinstance(duals, dict)

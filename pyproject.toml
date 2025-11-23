@@ -3,17 +3,17 @@ name = "PuLP"
 dynamic = ["version"]
 description = "PuLP is an LP modeler written in python. PuLP can generate MPS or LP files and call GLPK, COIN CLP/CBC, CPLEX, and GUROBI to solve linear problems."
 authors = [
-    {name = 'J.S. Roy'},
-    {name = "S.A. Mitchell", email= "pulp@stuartmitchell.com"},
-    {name = "Franco Peschiera", email = "pchtsp@gmail.com"}
+    { name = 'J.S. Roy' },
+    { name = "S.A. Mitchell", email = "pulp@stuartmitchell.com" },
+    { name = "Franco Peschiera", email = "pchtsp@gmail.com" },
 ]
-maintainers= [{name= "Franco Peschiera", email= "pchtsp@gmail.com"}]
+maintainers = [{ name = "Franco Peschiera", email = "pchtsp@gmail.com" }]
 dependencies = []
 requires-python = ">=3.9"
 readme = "README.rst"
 license = "MIT"
 license-files = ["LICENSE"]
-classifiers=[
+classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
     "Intended Audience :: Science/Research",
@@ -21,21 +21,15 @@ classifiers=[
     "Programming Language :: Python",
     "Topic :: Scientific/Engineering :: Mathematics",
 ]
-urls= {source= "https://github.com/coin-or/pulp", download="https://github.com/coin-or/pulp/archive/master.zip"}
-keywords=["Optimization", "Linear Programming", "Operations Research"]
+urls = { source = "https://github.com/coin-or/pulp", download = "https://github.com/coin-or/pulp/archive/master.zip" }
+keywords = ["Optimization", "Linear Programming", "Operations Research"]
 
 [tool.mypy]
-exclude = [
-    "pulp/solverdir/",
-    ".venv/.*",
-    "build/",
-]
+exclude = ["pulp/solverdir/", ".venv/.*", "build/"]
 warn_unused_ignores = true
 
 [[tool.mypy.overrides]]
-module = [
-  "pulp.*",
-]
+module = ["pulp.*"]
 follow_imports = "skip"
 
 [build-system]
@@ -54,46 +48,50 @@ dev = [
 
 [tool.setuptools]
 packages = [
-        "pulp",
-        "pulp.solverdir",
-        "pulp.solverdir.cbc.linux.i32",
-        "pulp.solverdir.cbc.linux.i64",
-        "pulp.solverdir.cbc.linux.arm64",
-        "pulp.solverdir.cbc.win.i32",
-        "pulp.solverdir.cbc.win.i64",
-        "pulp.solverdir.cbc.osx.i64",
-        "pulp.apis",
-        "pulp.tests"]
+    "pulp",
+    "pulp.solverdir",
+    "pulp.solverdir.cbc.linux.i32",
+    "pulp.solverdir.cbc.linux.i64",
+    "pulp.solverdir.cbc.linux.arm64",
+    "pulp.solverdir.cbc.win.i32",
+    "pulp.solverdir.cbc.win.i64",
+    "pulp.solverdir.cbc.osx.i64",
+    "pulp.apis",
+    "pulp.tests",
+]
 
 [tool.setuptools.dynamic]
-version = {attr = "pulp.__version__"}
+version = { attr = "pulp.__version__" }
 
 [tool.setuptools.package-data]
-"pulp.solverdir.cbc.linux.i32"= ["*", "*.*"]
-"pulp.solverdir.cbc.linux.i64"= ["*", "*.*"]
-"pulp.solverdir.cbc.linux.arm64"= ["*", "*.*"]
-"pulp.solverdir.cbc.win.i32"= ["*", "*.*"]
-"pulp.solverdir.cbc.win.i64"= ["*", "*.*"]
-"pulp.solverdir.cbc.osx.i64"= ["*", "*.*"]
+"pulp.solverdir.cbc.linux.i32" = ["*", "*.*"]
+"pulp.solverdir.cbc.linux.i64" = ["*", "*.*"]
+"pulp.solverdir.cbc.linux.arm64" = ["*", "*.*"]
+"pulp.solverdir.cbc.win.i32" = ["*", "*.*"]
+"pulp.solverdir.cbc.win.i64" = ["*", "*.*"]
+"pulp.solverdir.cbc.osx.i64" = ["*", "*.*"]
 
 [project.scripts]
 pulptest = "pulp.tests.run_tests:pulpTestAll"
 
 [tool.black]
 line-length = 88
-target-version = ['py37']
+target-version = ['py39']
 include = '\.pyi?$'
 exclude = '/(\.eggs|\.git|\.hg|\.mypy_cache|\.tox|\.venv|_build|buck-out|build|dist)/'
 
 [tool.uv]
-required-environments = [
-    "sys_platform == 'darwin'",
-]
+required-environments = ["sys_platform == 'darwin'"]
 
 
 [project.optional-dependencies]
 open_py = ["cylp", "highspy", "pyscipopt"]
-public_py = ["gurobipy", "coptpy", 'xpress', "cplex; sys_platform != 'darwin' or python_full_version < '3.12'"]
+public_py = [
+    "gurobipy",
+    "coptpy",
+    'xpress',
+    "cplex; sys_platform != 'darwin' or python_full_version < '3.12'",
+]
 highs = ["highspy"]
 scip = ["pyscipopt"]
 gurobi = ["gurobipy"]

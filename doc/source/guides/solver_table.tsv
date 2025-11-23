@@ -1,0 +1,26 @@
+	 Solver 	 Type 	 Time Limit 	 Gap Control 	 Threads 	 Warm Start 	 Max Nodes 	 Presolve 	 Open Source 	 Callbacks 	 SOS 	 Max Vars 	 Max Constraints 	 Primal/Dual Info 	
+	 HiGHS 	 Both 	 ✓ 	 ✓ (gapRel, gapAbs) 	 ✓ 	 ✓ 	 ✗ 	 ✗ (via options) 	 ✓ 	 ✓ (Python) 	 ✓ 	 Unlimited 	 Unlimited 	 ✓ 	
+	 HiGHS_CMD 	 Both 	 ✓ 	 ✓ (gapRel, gapAbs) 	 ✓ 	 ✓ 	 ✗ 	 ✗ (via options) 	 ✓ 	 ✗ 	 ✓ 	 Unlimited 	 Unlimited 	 Limited 	
+	 GUROBI 	 Both 	 ✓ 	 Via options 	 ✓ (via options) 	 Via options 	 Via options 	 Via options 	 ✗ 	 ✓ (Python) 	 ✓ 	 Unlimited 	 Unlimited 	 ✓ 	
+	 GUROBI_CMD 	 Both 	 ✓ 	 ✓ (gapRel, gapAbs) 	 ✓ 	 ✓ 	 ✗ 	 ✗ 	 ✗ 	 ✗ 	 ✓ 	 Unlimited 	 Unlimited 	 Limited 	
+	 CPLEX_PY 	 Both 	 ✓ 	 Via options 	 Via options 	 Via options 	 Via options 	 Via options 	 ✗ 	 ✓ (Python) 	 ✓ 	 Unlimited 	 Unlimited 	 ✓ 	
+	 CPLEX_CMD 	 Both 	 ✓ 	 ✓ (gapRel, gapAbs) 	 ✓ 	 ✓ 	 ✓ 	 ✗ 	 ✗ 	 ✗ 	 ✓ 	 Unlimited 	 Unlimited 	 Limited 	
+	 COPT 	 Both 	 ✓ 	 Via options 	 Via options 	 Via options 	 Via options 	 Via options 	 ✗ 	 ✓ (Python) 	 ✓ 	 Unlimited 	 Unlimited 	 ✓ 	
+	 COPT_CMD 	 Both 	 ✓ 	 Via options 	 Via options 	 ✓ 	 ✗ 	 ✗ 	 ✗ 	 ✗ 	 ? 	 Unlimited 	 Unlimited 	 Limited 	
+	 PULP_CBC_CMD 	 Both 	 ✓ 	 ✓ (gapRel, gapAbs) 	 ✓ 	 ✓ 	 ✓ 	 ✓ 	 ✓ 	 ✗ 	 Limited 	 Unlimited 	 ✓ 	
+     COIN_CMD 	 Both 	 ✓ 	 ✓ (gapRel, gapAbs) 	 ✓ 	 ✓ 	 ✓ 	 ✓ 	 ✓ 	 ✗ 	 Limited 	 Unlimited 	 ✓ 	
+	 XPRESS_PY 	 Both 	 ✓ 	 ✓ (gapRel) 	 Via options 	 ✓ 	 Via options 	 ✓ 	 ✗ 	 ✗ 	 ✓ 	 Unlimited 	 Unlimited 	 ✓ 	
+	 XPRESS 	 Both 	 ✓ 	 ✓ (gapRel) 	 Via options 	 ✓ 	 ✗ 	 ✓ 	 ✗ 	 ✗ 	 ✓ 	 Unlimited 	 Unlimited 	 Limited 	
+	 SCIP_CMD 	 Both 	 ✓ 	 ✓ (gapRel, gapAbs) 	 ✓ 	 ✗ 	 ✓ 	 ✗ 	 ✓ 	 ✗ 	 Limited 	 Unlimited 	 Limited 	
+	 SCIP_PY 	 Both 	 ✓ 	 Via options 	 Via options 	 ✗ 	 ✗ 	 ✗ 	 ✓ 	 ✗ 	 Limited 	 Unlimited 	 Limited 	
+	 MOSEK 	 Both 	 ✓ 	 Via options 	 Via options 	 ✗ 	 ✗ 	 ✗ 	 ✗ 	 ✓ (Python) 	 ✗ 	 Unlimited 	 Unlimited 	 ✓ 	
+	 PYGLPK 	 Both 	 ✓ 	 ✗ 	 ✗ 	 ✗ 	 ✗ 	 ✗ 	 ✓ 	 ✓ (Python) 	 ✗ 	 Unlimited 	 Unlimited 	 ✓ 	
+	 GLPK_CMD 	 Both 	 ✓ 	 ✗ 	 ✗ 	 ✗ 	 ✗ 	 ✗ 	 ✓ 	 ✗ 	 ✗ 	 Unlimited 	 Unlimited 	 Limited 	
+	 COINMP_DLL 	 Both 	 ✓ 	 Via options 	 ✗ 	 ✗ 	 ✗ 	 ✗ 	 ✓ 	 ✗ 	 ✗ 	 Unlimited 	 Unlimited 	 Limited 	
+	 YAPOSIB 	 Both 	 ✓ 	 ✗ 	 ✗ 	 ✗ 	 ✗ 	 ✗ 	 ✓ 	 ✓ (Python) 	 ✗ 	 Unlimited 	 Unlimited 	 ✓ 	
+	 SAS94 / SASCAS 	 Both 	 ✓ 	 ✗ 	 ✗ 	 ✓ 	 ✗ 	 ✗ 	 ✗ 	 ✗ 	 ? 	 Unlimited 	 Unlimited 	 ? 	
+	 FSCIP_CMD 	 Both 	 ✓ 	 ✓ (gapRel, gapAbs) 	 ✓ 	 ✗ 	 ✓ 	 ✗ 	 ✓ 	 ✗ 	 Limited 	 Unlimited 	 Limited 	
+	 MIPCL_CMD 	 Both 	 ✓ 	 ✗ 	 ✗ 	 ✗ 	 ✗ 	 ✗ 	 ✗ 	 ✗ 	 ? 	 Unlimited 	 Unlimited 	 ? 	
+	 CHOCO_CMD 	 Both 	 ✓ 	 ✗ 	 ✗ 	 ✗ 	 ✗ 	 ✗ 	 ✓ 	 ✗ 	 ? 	 Unlimited 	 Unlimited 	 ? 	
+	 CYLP 	 LP 	 ✓ 	 ✗ 	 ✗ 	 ✗ 	 ✗ 	 ✗ 	 ✓ 	 ✓ (Python) 	 ✗ 	 Unlimited 	 Unlimited 	 ✓ 	
+	 CUOPT 	 Both 	 ✓ 	 Via options 	 ✗ 	 ✗ 	 ✗ 	 ✗ 	 ✗ 	 ✓ (Python) 	 ? 	 Unlimited 	 Unlimited 	 ? 	
